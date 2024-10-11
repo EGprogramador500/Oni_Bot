@@ -1,21 +1,31 @@
 import telebot
-
-bot = telebot.TeleBot("7488526297:AAG1fK2Jd4CMkRZ6N-AD8oRYanoybxVszBY")
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+import time
+from config import TOKEN
+bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
-    bot.reply_to( message,
-    """ 
-        Bienvenido a tu Asistente Virtual Oni 🙌🏻
-        Plantillas SGA✏️
-        /sga Averias 
-        /obs Reprogramacion
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(
+        InlineKeyboardButton("Plantillas SGA ✏️", callback_data='sga'),
+        InlineKeyboardButton("Reprogramación 🔄", callback_data='obs')
+    )
+    bot.send_message(message.chat.id, 
+                     "Bienvenido a tu Asistente Virtual Oni 🙌🏻\nSeleccione una opción:", 
+                     reply_markup=keyboard)
 
-    """,)
-#plantillas para gestion de averias 
-@bot.message_handler(commands=["sga"])
-def send_sga (message):
-    bot.reply_to(message,
+# Manejador para las opciones de botones
+@bot.callback_query_handler(func=lambda call: True)
+def handle_query(call):
+    if call.data == 'sga':
+        send_sga(call.message)
+    elif call.data == 'obs':
+        send_obs(call.message)
+
+# Funciones para enviar las plantillas
+def send_sga(message):
+    msg = bot.send_message(message.chat.id,
     """
         Plantilla Averias:
 
@@ -23,7 +33,7 @@ def send_sga (message):
         /2 Cliente de Baja
         /3 Utiliza Splitter
         /4 Alerta Cliente Desconectado 
-        /5 Autoriza Recableado 
+        /5 Autoriza  Recableado 
         /6 Validación Llamada
         /7 Validar Casos con Costo
         /8 Cambio de Mesh
@@ -43,7 +53,10 @@ def send_sga (message):
         /22 Cambio de Ticket
         /23 Plantilla para Supervisor
     """
-    ,)
+    )
+
+    time.sleep(10)  # Esperar 10 segundos
+    bot.delete_message(message.chat.id, msg.message_id)
 
 @bot.message_handler(commands=["1"])
 def send_1 (message):
@@ -61,7 +74,6 @@ def send_1 (message):
         OBSERVACIONES:
     """
     ,)
-
 @bot.message_handler(commands=["2"])
 def send_2 (message):
     bot.reply_to(message,
@@ -421,14 +433,16 @@ def send_23 (message):
     """
     ,)
 #plantillas para observados
-@bot.message_handler(commands=["obs"])
-def send_obs (message):
-    bot.reply_to(message,
+def send_obs(message):
+    msg = bot.send_message(message.chat.id,
     """
         Plantilla Observados: 
         /24 Ticket Observados
     """
-    ,)
+    )
+
+    time.sleep(10)  # Esperar 10 segundos
+    bot.delete_message(message.chat.id, msg.message_id)
 
 @bot.message_handler(commands=["24"])
 def send_24 (message):
@@ -447,3 +461,4 @@ def send_24 (message):
 
 # Empezar a recibir mensajes
 bot.polling()
+
